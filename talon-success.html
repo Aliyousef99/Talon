@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TALON — Secure Connection</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050606;--neon:#1ef56a;--crimson:#e03b3b;--silver:#cfe2d7;}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--silver);font-family:'Share Tech Mono',ui-monospace,Menlo,monospace;overflow:hidden}
+.layer{position:fixed;inset:0;pointer-events:none}
+.scanlines{background:repeating-linear-gradient(to bottom,rgba(255,255,255,0.025)0 1px,transparent 1px 3px);mix-blend-mode:overlay;opacity:.12}
+.vignette{background:radial-gradient(1200px 600px at 50% 40%,transparent 30%,rgba(0,0,0,.65)80%)}
+.grid:before,.grid:after{content:"";position:absolute;inset:-30%;
+background:repeating-linear-gradient(transparent 0 28px,rgba(255,255,255,.03)28px 29px),
+repeating-linear-gradient(90deg,transparent 0 28px,rgba(255,255,255,.03)28px 29px);
+transform:perspective(900px)rotateX(62deg)translateY(22vh);filter:blur(.3px)contrast(120%);opacity:.12}
+.grid:after{transform:perspective(900px)rotateX(62deg)translateY(22vh)rotate(1deg);opacity:.05}
+
+/* Boot */
+#boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:20;background:#000;opacity:1;transition:opacity .6s ease}
+.boottext{font-family:Orbitron,sans-serif;letter-spacing:3px;text-transform:uppercase;color:var(--neon);font-weight:900;font-size:18px;opacity:.9}
+.bootbar{width:min(480px,80vw);height:8px;border-radius:10px;background:rgba(255,255,255,.06);overflow:hidden;margin-top:18px;opacity:.85}
+.bootbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--neon),#baf7c9)}
+
+/* HUD */
+.hud{position:fixed;top:20px;left:20px;right:20px;display:flex;align-items:center;justify-content:space-between;z-index:7}
+.brand{font-family:Orbitron,sans-serif;font-weight:900;letter-spacing:1px;font-size:14px;color:rgba(255,255,255,.8)}
+.secure{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--neon)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--neon);box-shadow:0 0 12px var(--neon);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}60%{opacity:.28}}
+
+/* Sigil */
+.center{position:fixed;inset:0;display:grid;place-items:center;z-index:5}
+.sigil{position:relative;width:min(300px,58vw);aspect-ratio:1/1;filter:drop-shadow(0 0 30px rgba(30,245,106,.12))}
+.ring{position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(30,245,106,.28),inset 0 0 30px rgba(30,245,106,.1)}
+.ring::before,.ring::after{content:"";position:absolute;inset:12%;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(30,245,106,.2);animation:spin 26s linear infinite}
+.ring::after{inset:20%;animation-direction:reverse;opacity:.55}
+@keyframes spin{to{transform:rotate(360deg)}}
+.claw{position:absolute;inset:18%;display:block;transform:translateZ(0);filter:drop-shadow(0 0 12px rgba(30,245,106,.15))}
+.claw:before,.claw:after,.claw i{content:"";position:absolute;top:8%;bottom:8%;width:22%;
+background:linear-gradient(180deg,rgba(30,245,106,.22),rgba(30,245,106,.06));
+clip-path:polygon(50% 0,64% 24%,52% 60%,50% 100%,48% 60%,36% 24%)}
+.claw i{left:39%;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(30,245,106,.12))}
+.claw:before{left:10%;transform:skewX(-8deg)}.claw:after{right:10%;transform:skewX(8deg)}
+
+/* Title */
+.hero{position:fixed;top:calc(50% + min(220px,42vw));left:0;right:0;text-align:center;z-index:6}
+.hero h1{margin:0;font-family:Orbitron,sans-serif;font-weight:900;letter-spacing:8px;font-size:clamp(28px,6vw,64px);
+color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.08);position:relative;filter:drop-shadow(0 10px 30px rgba(0,0,0,.7))}
+.hero h1::before,.hero h1::after{content:"TALON";position:absolute;inset:0;text-align:center;letter-spacing:inherit}
+.hero h1::before{color:var(--neon);transform:translateX(-5px);opacity:.86;mix-blend-mode:screen;filter:blur(.4px)}
+.hero h1::after{color:var(--crimson);transform:translateX(5px);opacity:.6;mix-blend-mode:screen;filter:blur(.6px)}
+.subtitle{margin-top:6px;font-size:12px;opacity:.7}
+
+/* Panel */
+.panel{position:fixed;left:50%;top:52%;transform:translate(-50%,-52%);
+width:min(900px,92vw);max-width:1100px;padding:26px;border-radius:12px;z-index:8;
+background:linear-gradient(180deg,rgba(0,0,0,.52),rgba(0,0,0,.34));border:1px solid rgba(255,255,255,.06);
+box-shadow:0 30px 100px rgba(0,0,0,.8),inset 0 0 60px rgba(30,245,106,.04);
+display:flex;flex-direction:column;gap:12px;backdrop-filter:blur(6px);
+opacity:0;animation:panelUp .8s ease forwards 1.2s}
+@keyframes panelUp{from{transform:translate(-50%,-46%);opacity:0}to{transform:translate(-50%,-52%);opacity:1}}
+.titleRow{display:flex;align-items:center;justify-content:space-between}
+.titleRow .t{font-family:Orbitron,sans-serif;color:var(--neon);font-weight:900;letter-spacing:2px}
+.titleRow .cd{font-size:12px;color:#a5e7c2}
+.term{border:1px dashed rgba(255,255,255,.06);border-radius:8px;min-height:200px;max-height:340px;overflow:auto;padding:12px;line-height:1.35}
+.progress{height:12px;border-radius:10px;background:rgba(255,255,255,.06);overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--neon),#baf7c9)}
+
+/* Ring HUD */
+.ringHUD{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:7;opacity:.9}
+.ringHUD svg{width:min(330px,60vw);height:auto;filter:drop-shadow(0 0 20px rgba(30,245,106,.12))}
+.tick{stroke:rgba(255,255,255,.08);stroke-width:1}
+
+/* Outro */
+#outro{position:fixed;inset:0;background:#000;z-index:30;display:none;align-items:center;justify-content:center;
+color:var(--neon);font-family:Orbitron,sans-serif;letter-spacing:2px}
+#outro.show{display:flex;animation:fadein .5s ease forwards}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- Boot -->
+<div id="boot">
+  <div class="boottext">SYSTEM BOOTING...</div>
+  <div class="bootbar"><i id="bootFill"></i></div>
+</div>
+
+<!-- Ambient -->
+<div class="layer grid"></div>
+<canvas id="dust" class="layer"></canvas>
+<canvas id="streaks" class="layer"></canvas>
+<div class="layer scanlines"></div>
+<div class="layer vignette"></div>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="brand">THE DYNASTY ARCHIVE · LOS SANTOS</div>
+  <div class="secure">SECURE CONNECTION <span class="dot"></span></div>
+</div>
+
+<!-- Sigil -->
+<div class="center">
+  <div class="sigil"><div class="ring"></div><span class="claw"><i></i></span></div>
+</div>
+
+<!-- Ring -->
+<div class="ringHUD">
+  <svg viewBox="0 0 260 260">
+    <g transform="translate(130,130)"><g id="ticks"></g></g>
+    <defs><linearGradient id="g" x1="0" x2="1">
+      <stop offset="0%" stop-color="#1ef56a"/><stop offset="100%" stop-color="#baf7c9"/>
+    </linearGradient></defs>
+    <circle cx="130" cy="130" r="96" stroke="rgba(255,255,255,.08)" stroke-width="2" fill="none"/>
+    <circle id="arc" cx="130" cy="130" r="96" stroke="url(#g)" stroke-width="4" fill="none"
+      stroke-linecap="round" stroke-dasharray="604" stroke-dashoffset="604"
+      transform="rotate(-90 130 130)"/>
+  </svg>
+</div>
+
+<!-- Panel -->
+<div class="panel" id="panel">
+  <div class="titleRow">
+    <div class="t">ACCESS GRANTED — INITIALIZING SECURE TUNNEL</div>
+    <div class="cd" id="cd">15s</div>
+  </div>
+  <div class="term" id="term"></div>
+  <div class="progress"><i id="bar"></i></div>
+</div>
+
+<!-- Title -->
+<div class="hero"><h1>TALON</h1><div class="subtitle">WE ARE EVERYWHERE • WE ARE EVERYONE</div></div>
+
+<!-- Outro -->
+<div id="outro"><div>LINK ESTABLISHED</div></div>
+
+<script>
+/* ===== SETTINGS ===== */
+const TOTAL_MS = 18000; // set 15000–20000 for 15–20s total
+const BOOT_MS  = 3000;  // boot duration
+const MAIN_MS  = TOTAL_MS - BOOT_MS;
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Boot progress */
+(function(){
+  const fill=document.getElementById('bootFill'),t0=performance.now();
+  function step(t){const p=Math.min(1,(t-t0)/BOOT_MS);fill.style.width=(p*100)+'%';if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);
+})();
+
+/* Particles (digital dust) */
+(function(){
+  const c=document.getElementById('dust'),ctx=c.getContext('2d');let W,H,P=[],COUNT=100;
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;P=Array.from({length:COUNT},spawn);}
+  function spawn(){const z=Math.random();return{x:Math.random()*W,y:Math.random()*H,z,r:0.6+z*1.6,vx:(Math.random()*0.2-0.1)*(0.4+z),vy:(-0.15-Math.random()*0.25)*(0.5+z),a:0.12+z*0.25,tw:Math.random()*Math.PI*2};}
+  function step(p){p.x+=p.vx;p.y+=p.vy;p.tw+=0.01+p.z*0.02;if(p.x<-10)p.x=W+10;if(p.x>W+10)p.x=-10;if(p.y<-10)p.y=H+10;if(p.y>H+10)p.y=-10;}
+  function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='rgba(0,0,0,0.35)';ctx.fillRect(0,0,W,H);
+    for(const p of P){const alpha=p.a*(0.8+0.2*Math.sin(p.tw));ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(30,245,106,${alpha})`;ctx.shadowColor='rgba(30,245,106,0.25)';ctx.shadowBlur=8*p.z+2;ctx.fill();ctx.shadowBlur=0;if(!RM)step(p);}
+    requestAnimationFrame(draw);}addEventListener('resize',resize);resize();draw();
+})();
+
+/* Rare data streaks */
+(function(){
+  const c=document.getElementById('streaks'),ctx=c.getContext('2d');let W,H,list=[];function resize(){W=c.width=innerWidth;H=c.height=innerHeight;}
+  addEventListener('resize',resize);resize();let spawning=true;
+  function spawn(){if(RM||!spawning)return;const angle=(Math.random()<0.5?0:Math.PI)+(Math.random()*0.6-0.3);
+    const speed=2.2+Math.random()*2.0,len=180+Math.random()*220,life=1000+Math.random()*1200;
+    const margin=60,sx=Math.random()<0.5?-margin:W+margin,sy=Math.random()*H*0.8+H*0.1;
+    list.push({x:sx,y:sy,angle,speed,len,born:performance.now(),life,width:1+Math.random()*1.5,alpha:0.25+Math.random()*0.25});
+    if(list.length>3)list.shift();}
+  (function schedule(){const d=3000+Math.random()*4000;setTimeout(()=>{spawn();if(spawning)schedule();},d);})();
+  function draw(t){ctx.clearRect(0,0,W,H);ctx.globalCompositeOperation='lighter';
+    for(let i=list.length-1;i>=0;i--){const s=list[i],age=t-s.born;if(age>s.life){list.splice(i,1);continue;}
+      const p=age/s.life,fade=(p<0.1)?p/0.1:(p>0.9?(1-p)/0.1:1);
+      const dx=Math.cos(s.angle)*s.speed,dy=Math.sin(s.angle)*s.speed;s.x+=dx;s.y+=dy;
+      const ex=s.x-Math.cos(s.angle)*s.len*0.5,ey=s.y-Math.sin(s.angle)*s.len*0.5;
+      const fx=s.x+Math.cos(s.angle)*s.len*0.5,fy=s.y+Math.sin(s.angle)*s.len*0.5;
+      ctx.lineWidth=s.width;ctx.strokeStyle=`rgba(30,245,106,${s.alpha*fade})`;
+      ctx.shadowColor='rgba(30,245,106,0.45)';ctx.shadowBlur=16;
+      ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(fx,fy);ctx.stroke();
+      ctx.shadowBlur=24;ctx.beginPath();ctx.arc(fx,fy,s.width*1.2,0,Math.PI*2);
+      ctx.fillStyle=`rgba(186,247,201,${0.35*fade})`;ctx.fill();ctx.shadowBlur=0;}
+    ctx.globalCompositeOperation='source-over';requestAnimationFrame(draw);}requestAnimationFrame(draw);
+  setTimeout(()=>{spawning=false;},TOTAL_MS-1000);
+})();
+
+/* Ring ticks */
+const ticks=document.getElementById('ticks');
+for(let i=0;i<36;i++){const a=(i/36)*Math.PI*2,r1=110,r2=118,x1=Math.cos(a)*r1,y1=Math.sin(a)*r1,x2=Math.cos(a)*r2,y2=Math.sin(a)*r2;
+const ln=document.createElementNS('http://www.w3.org/2000/svg','line');ln.setAttribute('x1',x1);ln.setAttribute('y1',y1);
+ln.setAttribute('x2',x2);ln.setAttribute('y2',y2);ln.setAttribute('class','tick');ticks.appendChild(ln);}
+let tickRot=0;(function spin(){tickRot+=0.25;ticks.setAttribute('transform',`rotate(${tickRot})`);requestAnimationFrame(spin);})();
+
+/* Terminal typing */
+const lines=[
+  "> AUTH TOKEN: TAL-"+Math.random().toString(36).substring(2,8).toUpperCase(),
+  "> Handshake complete",
+  "> Validating agent credentials",
+  "> Fetching index: ARCHIVE/DYNASTY/LS",
+  "> Verifying integrity of ledger segments",
+  "> Seeding stealth mesh nodes",
+  "> Negotiating ephemeral key pairs (ECDH-521)",
+  "> Establishing quantum-resistant fallback (Kyber-1024)",
+  "> Tunnel entropy check… OK",
+  "> Route obfuscation engaged",
+  "> Routing through mirror pool",
+  "> CONNECTION: STABLE"
+];
+function typeLines(){
+  const term=document.getElementById('term'); let i=0;
+  (function next(){
+    if(i>=lines.length) return;
+    const s=lines[i]; let j=0; const row=document.createElement('div'); term.appendChild(row);
+    const id=setInterval(()=>{
+      row.textContent=s.slice(0, ++j);
+      if(j>s.length){ clearInterval(id); i++; setTimeout(next,220); }
+      term.scrollTop=term.scrollHeight;
+    },22);
+  })();
+}
+
+/* Progress (ring + bar + countdown) using MAIN_MS */
+function startProgress(){
+  const arc=document.getElementById('arc'), bar=document.getElementById('bar'), cd=document.getElementById('cd');
+  const t0=performance.now(), dur=MAIN_MS;
+  function tick(t){
+    const p=Math.min(1,(t-t0)/dur);
+    arc.style.strokeDashoffset=(604*(1-p));
+    bar.style.width=(p*100)+'%';
+    cd.textContent=Math.ceil((1-p)*dur/1000)+'s';
+    if(p<1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* Orchestrate timeline */
+window.addEventListener('load', ()=>{
+  // End boot
+  setTimeout(()=>{ const b=document.getElementById('boot'); b.style.opacity=0; setTimeout(()=>{ b.style.display='none'; },600); }, BOOT_MS);
+  // Start main
+  setTimeout(()=>{ startProgress(); typeLines(); }, BOOT_MS);
+  // Outro + Easter-egg glitch
+  setTimeout(() => {
+    const outro = document.getElementById('outro');
+    const msg   = outro.querySelector('div');
+    outro.classList.add('show');
+
+    // RGB-split prep
+    msg.style.position = 'relative';
+    msg.style.fontSize = '1.8rem';
+    msg.style.filter = 'brightness(1.2) contrast(1.1)';
+    msg.innerHTML = '<span class="r">LINK</span> <span class="g">ESTABLISHED</span>';
+
+    // styles for glitch layers
+    const style = document.createElement('style');
+    style.textContent = `
+      #outro span { position:absolute; left:0; top:0; right:0; text-align:center; color:#1ef56a; mix-blend-mode:screen; }
+      #outro span.r { color:#e03b3b; transform:translate(1px,0); opacity:0.9; }
+      #outro span.g { color:#1ef56a; transform:translate(-1px,0); opacity:0.9; }
+      #outro.glitch { animation: staticFlash 0.12s steps(2) infinite; }
+      @keyframes staticFlash { 50% { filter: brightness(2) contrast(1.6); } }
+    `;
+    document.head.appendChild(style);
+
+    let count = 0;
+    const glitch = setInterval(() => {
+      const rand = Math.random();
+      msg.style.transform = `translate(${(Math.random()-0.5)*6}px, ${(Math.random()-0.5)*3}px) skewX(${(Math.random()-0.5)*4}deg)`;
+      msg.style.opacity = 0.5 + Math.random()*0.5;
+
+      // text corruption
+      if (rand > 0.75) {
+        msg.querySelector('.r').textContent = 'L!NK';
+        msg.querySelector('.g').textContent = 'E5TABL1SH3D';
+      } else if (rand < 0.25) {
+        msg.querySelector('.r').textContent = 'LINK';
+        msg.querySelector('.g').textContent = 'ESTABLISHED';
+      }
+
+      // static burst toggle
+      if (rand > 0.8) outro.classList.add('glitch'); else outro.classList.remove('glitch');
+
+      count++;
+      if (count > 30) { // ~1.8s
+        clearInterval(glitch);
+        outro.classList.remove('glitch');
+        msg.style.transform = 'none';
+        msg.style.opacity = 1;
+        msg.innerHTML = '<span style="color:#1ef56a;text-shadow:0 0 18px #1ef56a;">TALON ONLINE</span>';
+        msg.style.filter = 'brightness(1.4)';
+        // fade (optional redirect inside)
+        setTimeout(() => {
+          outro.style.transition = 'opacity 0.7s ease';
+          outro.style.opacity = 0;
+          // window.location.href = "/main.html"; // <- enable & set your target
+        }, 1000);
+      }
+    }, 60);
+  }, TOTAL_MS - 800);
+});
+
+/* Tiny hero wobble */
+const hero=document.querySelector('.hero h1');
+setInterval(()=>{ hero.style.transform=`translateX(${(Math.random()-0.5)*8}px) skew(${(Math.random()-0.5)*2}deg)`; setTimeout(()=> hero.style.transform='',140); },1100);
+</script>
+</body>
+</html>

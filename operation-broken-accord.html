@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talon Archives // DEBRIEF: BROKEN ACCORD</title>
+    <style>
+        /* --- Base Setup & Font --- */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            /* === TALON COLOR PALETTE === */
+            --primary-gold: #f0e68c;
+            --dim-gold: #ffd700;
+            --text-color: #ccc;
+            --bg-dark: #000;
+            --secondary-red: #b22222;
+            --bright-red: #ff0000;
+            --container-bg: rgba(10, 10, 10, 0.7);
+            --border-color: rgba(178, 34, 34, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-color); /* Default text */
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            
+            /* Faint Background Logo */
+            background-image: url('https://i.vgy.me/UI4yUS.png');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: 50vw;
+            background-blend-mode: overlay;
+        }
+        
+        /* Vignette overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 10vw #000, inset 0 0 15vw #000, inset 0 0 20vw #000;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- Main Layout (2-Column) --- */
+        .dashboard-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            /* Give space for header */
+            padding-top: 60px; 
+        }
+
+        .main-column {
+            flex: 3; 
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* --- === UPDATED HEADER BAR === --- */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--primary-gold);
+            font-size: 1.1em;
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Space between items */
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-right span {
+            margin-left: 20px;
+        }
+        
+        /* NEW: Back Button */
+        .back-button {
+            font-size: 1.8em;
+            color: var(--primary-gold);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            padding: 0 10px;
+        }
+        .back-button:hover {
+            color: var(--dim-gold);
+            text-shadow: 0 0 10px var(--dim-gold);
+            transform: scale(1.1);
+        }
+        
+        /* NEW: Header Logo */
+        .header-logo {
+            width: 35px;
+            height: auto;
+        }
+        
+        .header-title {
+            font-size: 1.1em;
+            color: var(--primary-gold);
+        }
+        /* === END OF HEADER UPDATE === --- */
+
+
+        /* --- General Widget Styling --- */
+        .widget {
+            border: 1px solid var(--border-color);
+            background-color: var(--container-bg);
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(178, 34, 34, 0.2);
+        }
+
+        .widget-title {
+            font-size: 1.8em;
+            color: var(--primary-gold);
+            margin: 0 0 20px 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px var(--primary-gold);
+        }
+
+        /* --- Main Column Widgets --- */
+        
+        /* Mission Briefing */
+        .briefing-text {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .briefing-directive {
+            color: var(--secondary-red);
+            font-weight: bold;
+            font-size: 1.4em;
+            text-shadow: 0 0 10px var(--bright-red);
+            /* New style for centering */
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* After-Action Report */
+        .aar-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        /* Final Objective Status */
+        .objective-list {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .objective-item {
+            display: flex;
+            align-items: flex-start;
+        }
+        .objective-icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .objective-icon.partial { /* For Partial / In Progress */
+            color: var(--dim-gold);
+        }
+        .objective-text h3 {
+            margin: 0 0 5px 0;
+            color: var(--primary-gold);
+            text-transform: uppercase;
+        }
+        .objective-text p {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 0.9em;
+        }
+
+        /* --- Sidebar Widgets --- */
+        
+        /* Asset Status */
+        .asset-group {
+            margin-bottom: 20px;
+        }
+        .asset-group h3 {
+            color: var(--primary-gold);
+            text-transform: uppercase;
+            font-size: 1em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        /* Profile Card Style */
+        .profile-card {
+            display: block;
+            background-color: rgba(30, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s ease-in-out;
+        }
+        .profile-card:hover {
+            background-color: rgba(50, 0, 0, 0.8);
+            border-color: var(--dim-gold);
+            box-shadow: 0 0 15px var(--dim-gold);
+            transform: translateY(-2px);
+        }
+        .profile-card .name {
+            font-size: 1.2em;
+            color: var(--primary-gold);
+            font-weight: bold;
+        }
+        .profile-card .title {
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+        .profile-card .name.redacted {
+            color: var(--secondary-red);
+            font-style: italic;
+        }
+
+        /* New Intelligence */
+        .intel-directive {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: var(--secondary-red);
+            font-weight: bold;
+            border: 1px solid var(--secondary-red);
+            padding: 15px;
+            text-shadow: 0 0 10px var(--bright-red);
+        }
+
+        /* Final Status */
+        .status-under-review {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--dim-gold); /* Yellow */
+            text-shadow: 0 0 10px var(--dim-gold);
+            text-align: center;
+        }
+        
+        /* --- Responsive --- */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                flex-direction: column;
+                padding-top: 80px; /* Adjust for header */
+            }
+        }
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .header-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .dashboard-container { padding-top: 120px; }
+            .widget { padding: 15px; }
+            .widget-title { font-size: 1.5em; }
+            .header-title { font-size: 1em; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header-bar">
+        <div class="header-left">
+            <a href="dashboard.html" class="back-button" title="Back to Dashboard">&#x2190;</a>
+            <img src="https://i.vgy.me/UI4yUS.png" alt="Logo" class="header-logo">
+            <span class="header-title">OPERATION: BROKEN ACCORD [DEBRIEF]</span>
+        </div>
+        <div class="header-right">
+            <span id="live-time">--:--:--</span>
+            <span>● SECURE CONNECTION</span>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        
+        <main class="main-column">
+
+            <section class="widget">
+                <h2 class="widget-title">Mission Briefing</h2>
+                <p class="briefing-text">
+                    Primary Objectives met. A portion of the stolen artifacts have been reclaimed and returned to the possession of Shadow.
+                </p>
+                <p class="briefing-text">
+                    The artifacts are to be studied and authenticated, a list of artifacts within our possession is to be made and compared to the artifacts within our archives, the returned artifacts must be protected
+                    <span class="briefing-directive">AT ALL COSTS</span>
+                </p>
+            </section>
+            
+            <section class="widget">
+                <h2 class="widget-title">After-Action Report</h2>
+                <p class="aar-text">
+                    Initial intel proved incomplete. Hostile presence was 3x greater than projected, and their tactics were... zealous. Operatives encountered heavy, sacrificial resistance, indicating the Faceless were not just guarding the artifacts, but actively communing with them.
+                </p>
+                <p class="aar-text">
+                    Lead Operative 'Buddha' made the command decision to bypass standard protocol, prioritizing a forced retrieval of high-value items over a full site cleanse.
+                </p>
+                <p class="aar-text">
+                    Secondary Operative 'Jones' held the extraction corridor against overwhelming numbers. The site is now considered compromised. All assets were forced to extract before the full collection could be completed. The remaining artifacts are considered lost or corrupted. This was not a theft; it was a failed consecration.
+                </p>
+            </section>
+
+            <section class="widget">
+                <h2 class="widget-title">Final Objective Status</h2>
+                <div class="objective-list">
+                    <div class="objective-item">
+                        <div class="objective-icon partial">[!]</div>
+                        <div class="objective-text">
+                            <h3>LOCATE</h3>
+                            <p>Primary site located. Secondary caches are suspected.</p>
+                        </div>
+                    </div>
+                    <div class="objective-item">
+                        <div class="objective-icon partial">[!]</div>
+                        <div class="objective-text">
+                            <h3>INFILTRATE</h3>
+                            <p>Site breached, but stealth compromised. Full infiltration partial.</p>
+                        </div>
+                    </div>
+                    <div class="objective-item">
+                        <div class="objective-icon partial">[○]</div>
+                        <div class="objective-text">
+                            <h3>SECURE</h3>
+                            <p>Artifacts on-site are not fully secured. Hostiles remain in the area.</p>
+                        </div>
+                    </div>
+                    <div class="objective-item">
+                        <div class="objective-icon partial">[!]</div>
+                        <div class="objective-text">
+                            <h3>EXTRACT</h3>
+                            <p>Partial extraction of high-priority assets successful. Full extraction pending.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        
+        <aside class="sidebar-column">
+            
+            <section class="widget">
+                <h2 class="widget-title">Asset Status</h2>
+                
+                <div class="asset-group">
+                    <h3>Command</h3>
+                    <a href="#" class="profile-card">
+                        <div class="name">Lang Buddha</div>
+                        <div class="title">Lead Operative</div>
+                    </a>
+                    <a href="#" class="profile-card">
+                        <div class="name">Charli Jones</div>
+                        <div class="title">Secondary Operative</div>
+                    </a>
+                    <a href="#" class="profile-card">
+                        <div class="name redacted">[REDACTED]</div>
+                        <div class="title">Intel Specialist</div>
+                    </a>
+                </div>
+            </section>
+
+            <section class="widget">
+                <h2 class="widget-title">New Intelligence</h2>
+                <div class="intel-directive">
+                    All Faceless assets are to be considered targets. All methods of information extraction are authorized.
+                </div>
+            </section>
+
+            <section class="widget">
+                <h2 class="widget-title">Operation Status</h2>
+                <div class="status-under-review">
+                    UNDER REVIEW
+                </div>
+            </section>
+
+        </aside>
+
+    </div>
+    
+    <script>
+        function updateTime() {
+            const timeElement = document.getElementById('live-time');
+            if (timeElement) {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const seconds = now.getSeconds().toString().padStart(2, '0');
+                timeElement.textContent = `${hours}:${minutes}:${seconds}`;
+            }
+        }
+        
+        // Update time immediately and then every second
+        updateTime();
+        setInterval(updateTime, 1000);
+    </sCRIPT>
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE DRAGON'S LAIR</title>
+    <style>
+        /* --- Base Setup --- */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #f0e68c; /* Talon Gold */
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            overflow: hidden; /* No scrollbars! */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        /* --- Vignette (Shadows) --- */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 10vw #000, inset 0 0 15vw #000;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        /* --- Faint Background Logo --- */
+        #background-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1; /* Behind the text */
+            width: 50vw; /* Large, but faint */
+            max-width: 500px;
+            height: auto;
+            opacity: 0; /* Starts hidden */
+            animation: logo-init 6s forwards, faint-pulse 8s infinite 6s;
+            /* Added transition for the final fade-out */
+            transition: opacity 1s ease-out;
+        }
+        
+        @keyframes logo-init {
+            from { opacity: 0; }
+            to { opacity: 0.08; } /* Very faint */
+        }
+        
+        @keyframes faint-pulse {
+            0%   { opacity: 0.08; }
+            50%  { opacity: 0.12; }
+            100% { opacity: 0.08; }
+        }
+
+
+        /* --- Text Container --- */
+        #terminal {
+            width: 90%;
+            position: relative;
+            z-index: 10; /* Above the logo */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* Transition for the blackout */
+            transition: opacity 0.2s ease-out;
+        }
+
+        /* --- Base Typewriter Message Styling --- */
+        .message {
+            font-size: 2.5vw;
+            line-height: 1.5;
+            margin: 10px 0;
+            opacity: 1; 
+            text-shadow: 0 0 5px #f0e68c;
+            /* Ensure it has a minimum height to prevent layout shift */
+            min-height: 3vw; 
+        }
+
+        /* --- NEW: Final Threat Typewriter Style --- */
+        .final-threat-typewriter {
+            font-size: 4vw; /* Larger text */
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #b22222; /* Deep Talon Red */
+            text-shadow: 0 0 10px rgba(178, 34, 34, 0.5); 
+            /* No glitch animation */
+        }
+
+    </style>
+</head>
+<body>
+
+    <img id="background-logo" src="https://i.vgy.me/UI4yUS.png" alt="Talon Logo">
+
+    <div id="terminal">
+        <p class="message" id="typewriter-line">&nbsp;</p>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const typewriterLine = document.getElementById('typewriter-line');
+        const backgroundLogo = document.getElementById('background-logo');
+
+        // --- UPDATED SCRIPT (New Flow) ---
+        const script = [
+            // { text, type, delay_before, pause_after }
+            { text: "This place is not for you.", type: "typewriter-replace", delay: 2000, pauseAfter: 2000 },
+            { text: "You have stirred the sleeping shadows.", type: "typewriter-replace", delay: 1000, pauseAfter: 2000 },
+            { text: "The Ancestors are watching.", type: "typewriter-replace", delay: 1000, pauseAfter: 3000 },
+            { type: "blackout", duration: 1500, delay: 0 }, 
+            { text: "Our mark looms over you", type: "typewriter-replace", delay: 0, pauseAfter: 3000 }, 
+            // UPDATED: This line is now a new type
+            { text: "YOUR DEBT WILL BE COLLECTED", type: "typewriter-final", delay: 0, pauseAfter: 4500 },
+            { type: "end", delay: 0 } 
+        ];
+
+        // --- UPDATED: Typewriter Function (Now handles different classes) ---
+        function typeWriterReplace(element, text, onComplete, newClass = '') {
+            let i = 0;
+            
+            // Reset element classes
+            element.className = 'message'; // Start with base class
+            if (newClass) {
+                element.classList.add(newClass);
+            }
+
+            // Clear the existing text
+            element.innerHTML = "";
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, 60); // Typing speed
+                } else if (onComplete) {
+                    // Call the onComplete callback *after* typing is done
+                    onComplete();
+                }
+            }
+            type();
+        }
+
+        // --- Main execution loop ---
+        async function runScript() {
+            
+            for (const line of script) {
+                // 1. Wait for the delay *before* the action
+                await new Promise(resolve => setTimeout(resolve, line.delay));
+
+                if (line.type === "typewriter-replace") {
+                    // Make sure terminal is visible
+                    terminal.style.opacity = 1; 
+                    // 2. Perform the action (typing)
+                    await new Promise(resolve => typeWriterReplace(typewriterLine, line.text, resolve));
+                    // 3. Wait for the pause *after* the action
+                    await new Promise(resolve => setTimeout(resolve, line.pauseAfter));
+                
+                } else if (line.type === "blackout") {
+                    terminal.style.opacity = 0;
+                    await new Promise(resolve => setTimeout(resolve, line.duration));
+                
+                // UPDATED: This now calls the typewriter with a new class
+                } else if (line.type === "typewriter-final") {
+                    terminal.style.opacity = 1;
+                    await new Promise(resolve => typeWriterReplace(typewriterLine, line.text, resolve, 'final-threat-typewriter'));
+                    await new Promise(resolve => setTimeout(resolve, line.pauseAfter));
+                
+                } else if (line.type === "end") {
+                    // 1. Hide the text
+                    terminal.style.opacity = 0; 
+                    // 2. Wait 2 seconds (logo is visible)
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    // 3. Fade out the logo itself
+                    backgroundLogo.style.opacity = 0;
+                    // 4. Wait a bit then redirect
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    window.location.href = "index.html";
+                }
+            }
+        }
+
+        // Start the sequence
+        runScript();
+    </script>
+
+</body>
+</html>

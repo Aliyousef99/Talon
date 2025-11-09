@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talon Archives - Dashboard</title>
+    <style>
+        /* --- Base Setup --- */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
+        :root {
+            --primary-gold: #f0e68c;
+            --dim-gold: #ffd700;
+            --text-color: #ccc;
+            --bg-dark: #000;
+            --secondary-red: #b22222;
+            --bright-red: #ff0000;
+            --container-bg: rgba(10, 10, 10, 0.7);
+            --border-color: rgba(178, 34, 34, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--primary-gold);
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            overflow-x: hidden; /* Hide horizontal scroll */
+        }
+        
+        /* --- Vignette (Shadows) --- */
+        body::after {
+            content: "";
+            position: fixed; /* Fixed so it doesn't scroll */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 10vw #000, inset 0 0 15vw #000;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        /* --- Faint Background Logo --- */
+        #background-logo {
+            position: fixed; /* Fixed so it doesn't move on scroll */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1; /* Behind the text */
+            width: 50vw;
+            max-width: 500px;
+            height: auto;
+            opacity: 0.1; /* Slightly more visible for a dashboard */
+            animation: faint-pulse 8s infinite;
+        }
+        
+        @keyframes faint-pulse {
+            0%   { opacity: 0.08; }
+            50%  { opacity: 0.12; }
+            100% { opacity: 0.08; }
+        }
+
+        /* --- Main Dashboard Container --- */
+        #dashboard-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* --- Header: Top Bar --- */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            border-bottom: 2px solid var(--secondary-red); /* Deep Talon Red */
+            box-shadow: 0 2px 15px rgba(178, 34, 34, 0.5); /* Red glow */
+            position: sticky;
+            top: 0;
+        }
+
+        /* Header: Top-Left (Logo & Title) */
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        .header-logo {
+            width: 45px;
+            height: auto;
+            margin-right: 15px;
+        }
+        .header-title {
+            font-size: 1.8em;
+            margin: 0;
+            color: var(--primary-gold);
+            text-shadow: 0 0 5px var(--primary-gold);
+        }
+
+        /* Header: Top-Right (Buttons) */
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        .nav-button {
+            margin-left: 20px;
+            padding: 8px 15px;
+            font-size: 1.1em;
+            color: var(--primary-gold);
+            text-decoration: none;
+            border: 1px solid var(--primary-gold);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+        .nav-button:hover {
+            color: #fff;
+            background-color: var(--dim-gold); /* Gold */
+            border-color: var(--dim-gold);
+            box-shadow: 0 0 15px var(--dim-gold);
+            text-shadow: 0 0 5px #000;
+        }
+        .nav-button.logout {
+            color: var(--secondary-red);
+            border-color: var(--secondary-red);
+        }
+        .nav-button.logout:hover {
+            color: #fff;
+            background-color: var(--secondary-red);
+            border-color: var(--bright-red);
+            box-shadow: 0 0 15px var(--bright-red);
+            text-shadow: none;
+        }
+
+        /* --- Main Operations Grid --- */
+        .operations-grid {
+            display: grid;
+            /* 3 columns per line */
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            
+            /* Centralized */
+            width: 90%;
+            max-width: 1400px;
+            margin: 40px auto; /* 40px top/bottom, auto left/right */
+            padding: 20px;
+        }
+
+        /* --- Widget Styling --- */
+        .widget {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color); /* Red border */
+            backdrop-filter: blur(8px);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(178, 34, 34, 0.3); /* Red glow */
+            transition: all 0.3s ease;
+            cursor: pointer; /* Indicates clickable */
+        }
+        .widget:hover {
+            /* Lifts up and glows gold */
+            transform: translateY(-5px);
+            border-color: var(--dim-gold);
+            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .widget h2 {
+            margin-top: 0;
+            color: var(--primary-gold);
+            border-bottom: 1px solid var(--secondary-red);
+            padding-bottom: 10px;
+        }
+        
+        .widget p {
+            color: var(--text-color);
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .widget-status {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            margin-top: 15px;
+            color: var(--secondary-red);
+            font-weight: bold;
+        }
+        
+        /* --- === MODAL POP-UP STYLES === --- */
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        #modal-overlay:not(.hidden) {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #modal-box {
+            position: relative;
+            width: 90%;
+            max-width: 700px;
+            background-color: var(--bg-dark);
+            border: 2px solid var(--secondary-red);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(178, 34, 34, 0.5);
+            padding: 30px 40px;
+            z-index: 1001;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        #modal-overlay:not(.hidden) #modal-box {
+            transform: scale(1);
+        }
+
+        #modal-title {
+            font-size: 2em;
+            color: var(--primary-gold);
+            text-shadow: 0 0 8px var(--primary-gold);
+            margin: 0 0 15px 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        #modal-description {
+            font-size: 1.1em;
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        #modal-status {
+            font-size: 1em;
+            color: var(--secondary-red);
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+        
+        #modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+        
+        .modal-button {
+            padding: 10px 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1em;
+            text-decoration: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #modal-close {
+            color: var(--primary-gold);
+            background-color: transparent;
+            border: 1px solid var(--primary-gold);
+        }
+        #modal-close:hover {
+            background-color: var(--primary-gold);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px var(--primary-gold);
+        }
+        
+        #modal-proceed {
+            color: var(--bg-dark);
+            background-color: var(--secondary-red);
+            border: 1px solid var(--bright-red);
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        #modal-proceed:hover {
+            background-color: var(--bright-red);
+            box-shadow: 0 0 15px var(--bright-red);
+            transform: translateY(-2px);
+        }
+
+
+        /* --- Responsive Design --- */
+        @media (max-width: 1200px) {
+            .operations-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .operations-grid {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-header {
+                flex-direction: column;
+                padding: 15px;
+            }
+            .header-right {
+                margin-top: 15px;
+            }
+        }
+        
+        /* Utility */
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <img id="background-logo" src="https://i.vgy.me/UI4yUS.png" alt="Talon Logo">
+
+    <div id="dashboard-container">
+        
+        <header class="dashboard-header">
+            <div class="header-left">
+                <img src="https://i.vgy.me/UI4yUS.png" alt="Talon Logo" class="header-logo">
+                <h1 class="header-title">Talon Archives</h1>
+            </div>
+            
+            <nav class="header-right">
+                <a href="talon-access-denied.html" class="nav-button">Agents</a>
+                <a href="index.html" class="nav-button logout">Logout</a>
+            </nav>
+        </header>
+        
+        <!-- === UPDATED: WIDGETS ARE NOW DIVS WITH ONCLICK === -->
+        <main class="operations-grid">
+            
+            <div class="widget" onclick="openOperationModal(
+                'Operation Broken Accord',
+                'The retrieval of all stolen artifacts that are in The Faceless\' posession, This is the consequence of leaving our history unprotected, Reclaim your history by ANY MEANS NECESSARY.',
+                'Status: CRITICAL',
+                'operation-broken-accord.html'
+            )">
+                <h2>Operation Broken Accord</h2>
+                <p>The retrieval of all stolen artifacts that are in The Faceless' posession, This is the consequence of leaving our history unprotected, Reclaim your history by ANY MEANS NECESSARY.</p>
+                <div class="widget-status">Status: CRITICAL</div>
+            </div>
+            
+            <div class="widget" onclick="openOperationModal(
+                'Operation Sundown',
+                'Monitor agents and movements in the Los Santos. Archive all communications, ensure agents survival, and intercept rival intel.',
+                'Status: Active',
+                'talon-access-denied.html'
+            )">
+                <h2>Operation Sundown</h2>
+                <p>Monitor agents and movements in the Los Santos. Archive all communications, ensure agents survival, and intercept rival intel.</p>
+                <div class="widget-status">Status: Active</div>
+            </div>
+            
+            <div class="widget" onclick="openOperationModal(
+                'Shadow Ledger',
+                'Manage the flow of debts and payments. Ensure all accounts are honored and collections are... timely.',
+                'Status: Pending',
+                'talon-access-denied.html'
+            )">
+                <h2>Shadow Ledger</h2>
+                <p>Manage the flow of debts and payments. Ensure all accounts are honored and collections are... timely.</p>
+                <div class="widget-status">Status: Pending</div>
+            </div>
+            
+            <div class="widget" onclick="openOperationModal(
+                'Project Lineage',
+                'Recruitment and initiation protocols. Review potential candidates, oversee their trials and ensure their oath is sworn.',
+                'Status: Pending Review',
+                'talon-access-denied.html'
+            )">
+                <h2>Project Lineage</h2>
+                <p>Recruitment and initiation protocols. Review potential candidates, oversee their trials and ensure their oath is sworn.</p>
+                <div class="widget-status">Status: Pending Review</div>
+            </div>
+
+            <div class="widget" onclick="openOperationModal(
+                'Rooster\'s Rest',
+                'Oversee security and information flow for Rooster\'s Rest and its visitors. No leaks, no exceptions.',
+                'Status: Active',
+                'talon-access-denied.html'
+            )">
+                <h2>Rooster's Rest</h2>
+                <p>Oversee security and information flow for Rooster's Rest and its visitors. No leaks, no exceptions.</p>
+                <div class="widget-status">Status: Active</div>
+            </div>
+            
+            <div class="widget" onclick="openOperationModal(
+                'Ancestor\'s Accord',
+                'Diplomatic channels and blood oaths. Monitor Lang Buddha for possible Oath breach, Target is of the Bloodline, DO NOT HARM.',
+                'Status: Awaiting further instructions',
+                'talon-access-denied.html'
+            )">
+                <h2>Ancestor's Accord</h2>
+                <p>Diplomatic channels and blood oaths. Monitor Lang Buddha for possible Oath breach, Target is of the Bloodline, DO NOT HARM.</p>
+                <div class="widget-status">Status: Awaiting further instructions</div>
+            </div>
+            
+            <div class="widget" onclick="openOperationModal(
+                'Whisper Network',
+                'Information gathering from across the city. Compile and verify all incoming rumors and secrets. Prioritize Faceless related information',
+                'Status: Active',
+                'talon-access-denied.html'
+            )">
+                <h2>Whisper Network</h2>
+                <p>Information gathering from across the city. Compile and verify all incoming rumors and secrets. Prioritize Faceless related information</p>
+                <div class="widget-status">Status: Active</div>
+            </div>
+
+            <div class="widget" onclick="openOperationModal(
+                'Operation Crimson',
+                'Active countermeasures against hostile entities. Sanctioned operations for intel collection and asset removal. Authorized to break WU\'s Codex for the protection of our cause',
+                'Status: Standby',
+                'talon-access-denied.html'
+            )">
+                <h2>Operation Crimson</h2>
+                <p>Active countermeasures against hostile entities. Sanctioned operations for intel collection and asset removal. Authorized to break WU's Codex for the protection of our cause</p>
+                <div class="widget-status">Status: Standby</div>
+            </div>
+            
+            <div class="widget" onclick="openOperationModal(
+                'Agent Dossiers',
+                'Review active agent files, mission logs, and psychological evaluations. Update as per the High Table\'s request. Report any and all suspicious activity to Headquarters',
+                'Status: Pending',
+                'talon-access-denied.html'
+            )">
+                <h2>Agent Dossiers</h2>
+                <p>Review active agent files, mission logs, and psychological evaluations. Update as per the High Table's request. Report any and all suspicious activity to Headquarters</p>
+                <div class="widget-status">Status: Pending</div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- === NEW: MODAL HTML === -->
+    <div id="modal-overlay" class="hidden" onclick="closeOperationModal()">
+        <div id="modal-box" onclick="event.stopPropagation()">
+            <h2 id="modal-title">Operation Title</h2>
+            <p id="modal-description">Operation description goes here...</p>
+            <div id="modal-status">Status: UNKNOWN</div>
+            <div id="modal-actions">
+                <button id="modal-close" class="modal-button" onclick="closeOperationModal()">Cancel</button>
+                <a id="modal-proceed" class="modal-button" href="#">View Full Report</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // --- NEW: MODAL JAVASCRIPT ---
+        
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDescription = document.getElementById('modal-description');
+        const modalStatus = document.getElementById('modal-status');
+        const modalProceed = document.getElementById('modal-proceed');
+
+        /**
+         * Opens the operation modal and populates it with data.
+         * @param {string} title - The title of the operation.
+         * @param {string} description - The description of the operation.
+         * @param {string} status - The status text.
+         * @param {string} link - The URL to link the proceed button to.
+         */
+        function openOperationModal(title, description, status, link) {
+            // 1. Populate the modal
+            modalTitle.textContent = title;
+            modalDescription.textContent = description;
+            modalStatus.textContent = status;
+            modalProceed.href = link;
+            
+            // 2. Show the modal
+            modalOverlay.classList.remove('hidden');
+        }
+
+        /**
+         * Closes the operation modal.
+         */
+        function closeOperationModal() {
+            modalOverlay.classList.add('hidden');
+        }
+
+    </script>
+
+</body>
+</html>

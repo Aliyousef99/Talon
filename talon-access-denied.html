@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="5;url=dashboard.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied - Talon Archives</title>
+    <style>
+        /* --- Base Setup --- */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #f0e68c; /* Talon Gold/Parchment */
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            overflow: hidden; /* No scrollbars */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        /* --- Vignette (Shadows) --- */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 10vw #000, inset 0 0 15vw #000;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        /* --- Faint Background Logo --- */
+        #background-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1; /* Behind the text */
+            width: 60vw; /* Larger for more presence */
+            max-width: 600px;
+            height: auto;
+            opacity: 0.05; /* Even fainter for a darker mood */
+            animation: faint-pulse 8s infinite;
+        }
+        
+        @keyframes faint-pulse {
+            0%   { opacity: 0.05; }
+            50%  { opacity: 0.08; }
+            100% { opacity: 0.05; }
+        }
+
+        /* --- Access Denied Container --- */
+        #access-denied-container {
+            position: relative;
+            z-index: 10;
+            width: 80%;
+            max-width: 800px;
+            padding: 40px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #b22222; /* Deep Talon Red */
+            box-shadow: 0 0 30px rgba(178, 34, 34, 0.5); /* Red glow */
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main-message {
+            font-size: 5vw; /* Responsive font size */
+            font-weight: bold;
+            color: #b22222; /* Deep Red for severity */
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(178, 34, 34, 0.7);
+            /* Subtle glitch effect */
+            animation: text-glitch 0.5s infinite alternate;
+        }
+        
+        @keyframes text-glitch {
+            0%   { transform: translate(0); text-shadow: 0 0 15px rgba(178, 34, 34, 0.7); }
+            25%  { transform: translate(-1px, 1px); text-shadow: 0 0 16px rgba(178, 34, 34, 0.8), 0 0 2px rgba(255, 0, 0, 0.2); }
+            50%  { transform: translate(1px, -1px); text-shadow: 0 0 15px rgba(178, 34, 34, 0.7); }
+            75%  { transform: translate(-1px, -1px); text-shadow: 0 0 16px rgba(178, 34, 34, 0.8), 0 0 2px rgba(255, 0, 0, 0.2); }
+            100% { transform: translate(0); text-shadow: 0 0 15px rgba(178, 34, 34, 0.7); }
+        }
+
+
+        .sub-message {
+            font-size: 1.5vw; /* Responsive */
+            margin-bottom: 15px;
+            color: #f0e68c;
+            text-shadow: 0 0 5px rgba(240, 230, 140, 0.5);
+        }
+        
+        .contact-message {
+            font-size: 1.2vw; /* Responsive */
+            color: #ccc;
+            margin-top: 20px;
+        }
+
+        .report-button {
+            margin-top: 30px;
+            padding: 12px 25px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #b22222; /* Deep Talon Red */
+            border: 1px solid #f00;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        .report-button:hover {
+            background-color: #f00; /* Brighter red on hover */
+            box-shadow: 0 0 20px #f00;
+            transform: translateY(-2px);
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            .main-message {
+                font-size: 8vw;
+            }
+            .sub-message {
+                font-size: 3vw;
+            }
+            .contact-message {
+                font-size: 2.5vw;
+            }
+            .report-button {
+                font-size: 1em;
+                padding: 10px 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            .main-message {
+                font-size: 10vw;
+            }
+            .sub-message {
+                font-size: 4vw;
+            }
+            .contact-message {
+                font-size: 3vw;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <img id="background-logo" src="https://i.vgy.me/UI4yUS.png" alt="Talon Logo">
+
+    <div id="access-denied-container">
+        <h1 class="main-message">ACCESS DENIED</h1>
+        <p class="sub-message">Unauthorized Entry Detected.</p>
+        <p class="sub-message">This incident has been logged and reported.</p>
+        <p class="contact-message">Your clearance level does not permit access to these operations.</p>
+    </div>
+
+</body>
+</html>
