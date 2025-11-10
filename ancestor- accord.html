@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talon Archives // RECORD: ANCESTOR'S ACCORD</title>
+    <style>
+        /* --- Base Setup & Font --- */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            /* === TALON COLOR PALETTE === */
+            --primary-gold: #f0e68c;
+            --dim-gold: #ffd700;
+            --text-color: #ccc;
+            --bg-dark: #000;
+            --secondary-red: #b22222;
+            --bright-red: #ff0000;
+            --container-bg: rgba(10, 10, 10, 0.7);
+            --border-color: rgba(178, 34, 34, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-color); /* Default text */
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            
+            /* Faint Background Logo */
+            background-image: url('https://i.vgy.me/UI4yUS.png');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: 50vw;
+            background-blend-mode: overlay;
+        }
+        
+        /* Vignette overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 10vw #000, inset 0 0 15vw #000, inset 0 0 20vw #000;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- Main Layout (2-Column) --- */
+        .dashboard-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            /* Give space for header */
+            padding-top: 60px; 
+        }
+
+        .main-column {
+            flex: 3; 
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* --- === UPDATED HEADER BAR === --- */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--primary-gold);
+            font-size: 1.1em;
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Space between items */
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-right span {
+            margin-left: 20px;
+        }
+        
+        /* NEW: Back Button */
+        .back-button {
+            font-size: 1.8em;
+            color: var(--primary-gold);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            padding: 0 10px;
+        }
+        .back-button:hover {
+            color: var(--dim-gold);
+            text-shadow: 0 0 10px var(--dim-gold);
+            transform: scale(1.1);
+        }
+        
+        /* NEW: Header Logo */
+        .header-logo {
+            width: 35px;
+            height: auto;
+        }
+        
+        .header-title {
+            font-size: 1.1em;
+            color: var(--primary-gold);
+        }
+        /* === END OF HEADER UPDATE === --- */
+
+
+        /* --- General Widget Styling --- */
+        .widget {
+            border: 1px solid var(--border-color);
+            background-color: var(--container-bg);
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(178, 34, 34, 0.2);
+        }
+
+        .widget-title {
+            font-size: 1.8em;
+            color: var(--primary-gold);
+            margin: 0 0 20px 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px var(--primary-gold);
+        }
+
+        /* --- Main Column Widgets --- */
+        
+        /* Mission Briefing */
+        .briefing-text {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .briefing-directive {
+            color: var(--secondary-red);
+            font-weight: bold;
+            font-size: 1.4em;
+            text-shadow: 0 0 10px var(--bright-red);
+            /* New style for centering */
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* After-Action Report */
+        .aar-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        /* Final Objective Status */
+        .objective-list {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .objective-item {
+            display: flex;
+            align-items: flex-start;
+        }
+        .objective-icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .objective-icon.partial { /* For Partial / In Progress */
+            color: var(--dim-gold);
+        }
+        .objective-text h3 {
+            margin: 0 0 5px 0;
+            color: var(--primary-gold);
+            text-transform: uppercase;
+        }
+        .objective-text p {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 0.9em;
+        }
+
+        /* --- Sidebar Widgets --- */
+        
+        /* Asset Status */
+        .asset-group {
+            margin-bottom: 20px;
+        }
+        .asset-group h3 {
+            color: var(--primary-gold);
+            text-transform: uppercase;
+            font-size: 1em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        /* Profile Card Style */
+        .profile-card {
+            display: block;
+            background-color: rgba(30, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s ease-in-out;
+        }
+        .profile-card:hover {
+            background-color: rgba(50, 0, 0, 0.8);
+            border-color: var(--dim-gold);
+            box-shadow: 0 0 15px var(--dim-gold);
+            transform: translateY(-2px);
+        }
+        .profile-card .name {
+            font-size: 1.2em;
+            color: var(--primary-gold);
+            font-weight: bold;
+        }
+        .profile-card .title {
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+        .profile-card .name.redacted {
+            color: var(--secondary-red);
+            font-style: italic;
+        }
+
+        /* New Intelligence */
+        .intel-directive {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: var(--secondary-red);
+            font-weight: bold;
+            border: 1px solid var(--secondary-red);
+            padding: 15px;
+            text-shadow: 0 0 10px var(--bright-red);
+        }
+
+        /* Final Status */
+        .status-under-review {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--dim-gold); /* Yellow */
+            text-shadow: 0 0 10px var(--dim-gold);
+            text-align: center;
+        }
+        
+        /* --- Responsive --- */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                flex-direction: column;
+                padding-top: 80px; /* Adjust for header */
+            }
+        }
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .header-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .dashboard-container { padding-top: 120px; }
+            .widget { padding: 15px; }
+            .widget-title { font-size: 1.5em; }
+            .header-title { font-size: 1em; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header-bar">
+        <div class="header-left">
+            <a href="dashboard.html" class="back-button" title="Back to Dashboard">&#x2190;</a>
+            <img src="https://i.vgy.me/UI4yUS.png" alt="Logo" class="header-logo">
+            <span class="header-title">RECORD: ANCESTOR'S ACCORD</span>
+        </div>
+        <div class="header-right">
+            <span id="live-time">--:--:--</span>
+            <span>● SECURE CONNECTION</span>
+        </div>
+    </header>
+    
+    <div class="dashboard-container">
+        
+        <main class="main-column">
+
+           <section class="widget">
+                <h2 class="widget-title" style="color: var(--secondary-red); text-align: center;">CLASSIFICATION: HIGH TABLE EYES ONLY</h2>
+                <p class="aar-text" style="text-align: center; font-size: 1.1em; line-height: 1.7; color: var(--dim-gold);">
+                    <strong>NOTE: Per High Table protocol, the Bloodline Scion, Lang Buddha, is referred to herein by his lineage designation: (Wu-B).</strong>
+                </p>
+                <p class="aar-text" style="text-align: center; font-size: 1.2em; line-height: 1.8; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 20px;">
+                    <strong>SUBJECT:</strong> Bloodline Scion (Wu-B)<br>
+                    <strong>OPERATION:</strong> ANCESTOR'S ACCORD<br>
+                    <strong>DATE (ORIGINAL):</strong> 11/17/2023<br>
+                    <strong>DATE (CURRENT):</strong> 11/10/2025<br>
+                    <strong>STATUS:</strong> <span style="color: var(--bright-red); font-weight: bold;">ACTIVE - PHASE I (MONITOR) CONCLUDED. // INITIATING PHASE II (INTERVENTION).</span>
+                </p>
+            </section>
+
+            <section class="widget">
+                <h2 class="widget-title">1. ORIGINAL DIRECTIVE (11/17/2023)</h2>
+                <p class="aar-text">By order of a deadlocked High Table, this operation is initiated following a verifiable, sacred oath-break by the Scion (Wu-B).</p>
+                <p class="aar-text">The Table was, and remains, split over the Scion's breach. The <strong>Traditionalist</strong> wing argued that the old law is absolute and forbids sanctioning the Bloodline. The <strong>Pragmatist</strong> wing argued that any breach constitutes an existential threat.</p>
+                <p class="aar-text">The "Ancestor's Accord" was the only compromise:</p>
+                <ul style="list-style-type: square; padding-left: 20px; margin-bottom: 20px; font-size: 1.1em; line-height: 1.6;">
+                    <li>The Scion will not be sanctioned at this time.</li>
+                    <li>A formal investigation into the oath-break is opened.</li>
+                    <li>Directive: "Monitor Lang Buddha for possible Oath breach. Target is of the Bloodline. DO NOT HARM."</li>
+                    <li>Status: Indefinite, pending Table resolution or exigent circumstances.</li>
+                </ul>
+            </section>
+
+            <section class="widget">
+                <h2 class="widget-title">2. OPERATIONAL SUMMARY (2023-2025)</h2>
+                <p class="aar-text"><strong>Phase I (Monitor) Active:</strong></p>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li style="margin-bottom: 15px;"><strong>Logged 12/13/2023</strong><br>In a flagrant disregard for his duties during this crisis, the Scion (Wu-B) abandoned his post ("Rooster's Rest") and the artifacts within. He traveled to Brazil, abdicating his sworn duty. The High Table was incensed, but the Traditionalist wing argued this was not a <em>new</em> breach, and the stalemate held.</li>
+                    <li style="margin-bottom: 15px;"><strong>Logged 01/13/2024</strong><br>Scion returned from Brazil after an absence of approximately one month. He has resumed "protection" of the still-abandoned headquarters.</li>
+                    <li style="margin-bottom: 15px;"><strong>Logged 01/20/2025</strong><br><strong>THREAT ESCALATION.</strong> Intelligence confirms "The Faceless" is no longer a peripheral entity. They are actively mirroring our structure, poaching assets, and are now classified as a primary existential threat. The High Table's risk calculus has shifted dramatically.</li>
+                    <li style="margin-bottom: 15px;"><strong>Logged 01/25/2025</strong><br><strong>CRITICAL INCIDENT - SECONDARY BREACH.</strong> In this new high-threat environment, the Scion (Wu-B) was observed revealing the location's secrets and the artifacts themselves to an unsworn, unknown civilian (Subject: "Charli Jones").</li>
+                    <li style="margin-bottom: 15px;"><strong>Logged 01/26/2025</strong><br><strong>HIGH TABLE EMERGENCY SESSION.</strong> The Pragmatist wing, citing the new Faceless threat, demanded the immediate neutralization of the civilian. The Traditionalist wing, supported by the <em>Protectorate Sect</em>, argued this may be the Scion's chosen "protégé," a continuation of the line's method.</li>
+                    <li style="margin-bottom: 15px;"><strong>Logged 01/27/2025</strong><br><strong>ACCORD UPDATE.</strong> The compromise was to dispatch a Protector (Agent "[REDACTED]," <em>Protectorate Sect</em>) under his sacred vows (anonymity, silence, protection of the Bloodline). His directive was expanded: <strong>Observe and report on both the Scion (Wu-B) and Subject C-J. No intervention authorized.</strong></li>
+                    <li style="margin-bottom: 15px;"><strong>Logged 02/04/2025</strong><br>Operative (Jacob Harth) provided Subject C-J with the oath. This action validated the Traditionalist "protégé" hypothesis, averting a deeper crisis and saving the Scion (Wu-B) from a <em>third</em> oath-break by proxy.</li>
+                    <li style="margin-bottom: 15px;"><strong>Logged 04/12/2025</strong><br>A joint mission was authorized by the Table to strike a Faceless asset ("Victor Blackwell") and retrieve a USB. The Scion (Wu-B) and the newly-sworn C-J were used as the primary team. This served as a successful loyalty test for C-J and a strike against our rival. Agent [REDACTED] observed, remaining anonymous.</li>
+                </ul>
+            </section>
+
+            <section class="widget">
+                <h2 class="widget-title">3. CURRENT STATUS UPDATE (11/10/2025)</h2>
+                <h3 style="color: var(--primary-gold); text-transform: uppercase;">SUBJECT: ESCALATION TO PHASE II (INTERVENTION)</h3>
+                <p class="aar-text"><strong>A. TRIGGER INCIDENT (FAILURE OF CONTAINMENT)</strong></p>
+                <p class="aar-text">Passive monitoring and anonymous protection are no longer viable.</p>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li style="margin-bottom: 15px;"><strong>Logged 10/10/2025</strong><br>The Scion relocated all artifacts to a new, unsecured civilian settlement ("New Babylon"). This was precipitated by the Scion's <em>presumption</em> that his primary headquarters ("Rooster's Rest") was compromised at an unknown prior date.</li>
+                    <li style="margin-bottom: 15px;"><strong>Logged 10/29/2025</strong><br><strong>CRITICAL EXPOSURE.</strong> Nearly three weeks after relocating the artifacts, the Scion engaged in a public, armed conflict with local law enforcement <em>on the very land</em> where he has hidden our entire legacy.</li>
+                </ul>
+                <p class="aar-text"><strong>B. ANALYSIS</strong></p>
+                <p class="aar-text">The Scion's recklessness has achieved what The Faceless could not. He has invited public, government-level scrutiny to the artifacts. He is operating blind, ignorant of our true scope, and has become the single greatest threat to our history.</p>
+                <p class="aar-text">This action has broken the High Table stalemate. The Traditionalists can no longer defend him, as his actions now directly jeopardize the "continuation of the Bloodline" that Agent [REDACTED] is sworn to protect. The Pragmatists view this as the final, indisputable proof of his incompetence. The vote to intervene was unanimous.</p>
+                <p class="aar-text"><strong>C. REVISED DIRECTIVE (PHASE II: ACTIVE)</strong></p>
+                <p class="aar-text">"Operation: Ancestor's Accord" is escalated.</p>
+                <p class="aar-text">The Protector (Agent [REDACTED]) is ordered to break his anonymity and make direct contact with the Bloodline Scion <em>after</em> the immediate police response has subsided.</p>
+                <p class="aar-text">Agent [REDACTED]'s operational parameters, derived from the old law, are now his primary mandate:</p>
+                <ul style="list-style-type: square; padding-left: 20px; margin-bottom: 20px; font-size: 1.1em; line-height: 1.6;">
+                    <li>He will defer to the Scion's orders, <em>unless</em> those orders jeopardize the safety of the Bloodline or the artifacts.</li>
+                    <li>He possesses the authority to "weigh" the Scion's decisions and act independently to ensure survival.</li>
+                    <li>His primary, non-negotiable objective is to secure the artifacts and remove them from the compromised "New Babylon" location.</li>
+                </ul>
+                <p class="aar-text">We are forced to intervene to protect the Bloodline from himself.</p>
+            </section>
+
+            <section class="widget">
+                <h2 class="widget-title">4. CONCLUSION (CURRENT)</h2>
+                <p class="aar-text">We are deploying an agent of the Old Law to solve a problem the Old Law created. This is the only path that respects the Table's divide. The Protector will ensure the line continues, and more importantly, that our history does not fall into the hands of The Faceless... or the local police.</p>
+                <p class="aar-text" style="text-align: center; font-weight: bold; color: var(--primary-gold);">[END REPORT]</p>
+            </section>
+
+        </main>
+        
+        <aside class="sidebar-column">
+            
+            <section class="widget">
+                <h2 class="widget-title">Status</h2>
+                
+                <div class="asset-group">
+                    <h3>Subject</h3>
+                    <a href="#" class="profile-card">
+                        <div class="name">Lang Buddha</div>
+                        <div class="title">The Shadow</div>
+                    </a>
+                    <a href="#" class="profile-card">
+                        <div class="name">Kayn Larp</div>
+                        <div class="title">Yeager Demonblood</div>
+                    </a>
+                    <a href="#" class="profile-card">
+                        <div class="name">Charli Jones</div>
+                        <div class="title">The Protege</div>
+                    </a>
+                    <a href="#" class="profile-card redacted">
+                        <div class="name">REDACTED</div>
+                        <div class="title">Anonymous Observer (Protectorate Sect)</div>
+                    </a>
+                </div>
+                </div>
+            </section>
+
+            <section class="widget">
+                <h2 class="widget-title">New Intelligence</h2>
+                <div class="intel-directive">
+                    Continue monitoring. Report any direct violations of the blood oath immediately. Discretion is paramount.
+                </div>
+            </section>
+
+        </aside>
+
+    </div>
+    
+    <script>
+        function updateTime() {
+            const timeElement = document.getElementById('live-time');
+            if (timeElement) {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const seconds = now.getSeconds().toString().padStart(2, '0');
+                timeElement.textContent = `${hours}:${minutes}:${seconds}`;
+            }
+        }
+        
+        // Update time immediately and then every second
+        updateTime();
+        setInterval(updateTime, 1000);
+    </sCRIPT>
+
+</body>
+</html>
