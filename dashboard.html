@@ -211,7 +211,7 @@
             transition: opacity 0.3s ease;
         }
         
-        #modal-overlay:not(.hidden) {
+        #modal-overlay.visible {
             opacity: 1;
             pointer-events: all;
         }
@@ -230,7 +230,7 @@
             transition: transform 0.3s ease;
         }
         
-        #modal-overlay:not(.hidden) #modal-box {
+        #modal-overlay.visible #modal-box {
             transform: scale(1);
         }
 
@@ -262,6 +262,7 @@
             display: flex;
             justify-content: flex-end;
             gap: 15px;
+            margin-top: 20px;
         }
         
         .modal-button {
@@ -285,13 +286,13 @@
             box-shadow: 0 0 15px var(--primary-gold);
         }
         
-        #modal-proceed {
+        #modal-proceed, #modal-submit-password {
             color: var(--bg-dark);
             background-color: var(--secondary-red);
             border: 1px solid var(--bright-red);
             text-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
-        #modal-proceed:hover {
+        #modal-proceed:hover, #modal-submit-password:hover {
             background-color: var(--bright-red);
             box-shadow: 0 0 15px var(--bright-red);
             transform: translateY(-2px);
@@ -342,7 +343,6 @@
             </nav>
         </header>
         
-        <!-- === UPDATED: WIDGETS ARE NOW DIVS WITH ONCLICK === -->
         <main class="operations-grid">
             
             <div class="widget" onclick="openOperationModal(
@@ -356,7 +356,7 @@
                 <div class="widget-status">Status: CRITICAL</div>
             </div>
             
-                        <div class="widget" onclick="openOperationModal(
+            <div class="widget" onclick="openOperationModal(
                 'Ancestor\'s Accord',
                 'Ongoing monitoring of the subject \'Lang Buddha\' for adherence to the Ancestor\'s Accord. All activities, communications, and alliances are to be logged for review. Target is of the Bloodline. Do not harm.',
                 'Status: ACTIVE',
@@ -447,52 +447,83 @@
         </main>
     </div>
 
-    <!-- === NEW: MODAL HTML === -->
-    <div id="modal-overlay" class="hidden" onclick="closeOperationModal()">
+    <div id="modal-overlay" onclick="closeOperationModal()">
         <div id="modal-box" onclick="event.stopPropagation()">
             <h2 id="modal-title">Operation Title</h2>
             <p id="modal-description">Operation description goes here...</p>
             <div id="modal-status">Status: UNKNOWN</div>
+
+            <div id="modal-password-section" class="hidden">
+                <p style="color: var(--primary-gold); margin-top: 20px; text-transform: uppercase;">Authentication Required</p>
+                <input type="password" id="modal-password-input" placeholder="Enter Passphrase..." style="width: 100%; padding: 10px; background: #111; border: 1px solid var(--border-color); color: var(--text-color); font-family: 'Share Tech Mono', monospace; font-size: 1.1em;">
+                <p id="modal-password-error" class="hidden" style="color: var(--bright-red); margin-top: 10px; text-transform: uppercase;">Access Denied. Incorrect Passphrase.</p>
+            </div>
+
             <div id="modal-actions">
                 <button id="modal-close" class="modal-button" onclick="closeOperationModal()">Cancel</button>
                 <a id="modal-proceed" class="modal-button" href="#">View Full Report</a>
+                <button id="modal-submit-password" class="modal-button hidden" onclick="checkPassword()">Submit</button>
             </div>
         </div>
     </div>
     
     <script>
-        // --- NEW: MODAL JAVASCRIPT ---
-        
         const modalOverlay = document.getElementById('modal-overlay');
         const modalTitle = document.getElementById('modal-title');
         const modalDescription = document.getElementById('modal-description');
         const modalStatus = document.getElementById('modal-status');
         const modalProceed = document.getElementById('modal-proceed');
+        const modalPasswordSection = document.getElementById('modal-password-section');
+        const modalPasswordInput = document.getElementById('modal-password-input');
+        const modalPasswordError = document.getElementById('modal-password-error');
+        const modalSubmitPassword = document.getElementById('modal-submit-password');
 
-        /**
-         * Opens the operation modal and populates it with data.
-         * @param {string} title - The title of the operation.
-         * @param {string} description - The description of the operation.
-         * @param {string} status - The status text.
-         * @param {string} link - The URL to link the proceed button to.
-         */
+        let currentLink = '';
+
         function openOperationModal(title, description, status, link) {
-            // 1. Populate the modal
             modalTitle.textContent = title;
             modalDescription.textContent = description;
             modalStatus.textContent = status;
-            modalProceed.href = link;
+            currentLink = link;
+
+            // Reset all to default state first
+            modalProceed.classList.remove('hidden');
+            modalPasswordSection.classList.add('hidden');
+            modalSubmitPassword.classList.add('hidden');
+            modalPasswordError.classList.add('hidden');
+            modalPasswordInput.value = '';
+
+            if (title === 'Ancestor\'s Accord') {
+                modalProceed.classList.add('hidden');
+                modalPasswordSection.classList.remove('hidden');
+                modalSubmitPassword.classList.remove('hidden');
+            } else {
+                modalProceed.href = link;
+            }
             
-            // 2. Show the modal
-            modalOverlay.classList.remove('hidden');
+            modalOverlay.classList.add('visible');
         }
 
-        /**
-         * Closes the operation modal.
-         */
         function closeOperationModal() {
-            modalOverlay.classList.add('hidden');
+            modalOverlay.classList.remove('visible');
         }
+
+        function checkPassword() {
+            const password = "the rooster flies over nest with egg in hand";
+            if (modalPasswordInput.value === password) {
+                window.location.href = currentLink;
+            } else {
+                modalPasswordError.classList.remove('hidden');
+                modalPasswordInput.value = ''; // Clear input on failure
+            }
+        }
+        
+        // Allow closing modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeOperationModal();
+            }
+        });
 
     </script>
 
